@@ -283,7 +283,11 @@ class InterviewManager {
             answer = textarea ? textarea.value.trim() : '';
         }
         
-        if (answer) {
+        // Debug logging
+        console.log(`Saving answer for question ${this.currentQuestion}:`, answer);
+        
+        // Save answer even if it's short, but not if it's completely empty
+        if (answer !== '') {
             this.answers[this.currentQuestion] = answer;
                         
             // Save locally as backup
@@ -295,6 +299,9 @@ class InterviewManager {
             
             // Update save status
             this.showSaveStatus('saved');
+            console.log(`Answer saved successfully for question ${this.currentQuestion}`);
+        } else {
+            console.log(`No answer to save for question ${this.currentQuestion} (empty)`);
         }
         
         this.updateStats();
@@ -354,6 +361,8 @@ class InterviewManager {
     
     nextQuestion() {
         if (this.currentQuestion < this.totalQuestions - 1) {
+            // Save current answer before navigating
+            this.saveCurrentAnswer(true);
             this.recordQuestionTime();
             this.navigateToQuestion(this.currentQuestion + 1);
         }
@@ -361,6 +370,8 @@ class InterviewManager {
     
     previousQuestion() {
         if (this.currentQuestion > 0) {
+            // Save current answer before navigating
+            this.saveCurrentAnswer(true);
             this.recordQuestionTime();
             this.navigateToQuestion(this.currentQuestion - 1);
         }
@@ -368,6 +379,8 @@ class InterviewManager {
     
     goToQuestion(questionIndex) {
         if (questionIndex >= 0 && questionIndex < this.totalQuestions && questionIndex !== this.currentQuestion) {
+            // Save current answer before navigating
+            this.saveCurrentAnswer(true);
             this.recordQuestionTime();
             this.navigateToQuestion(questionIndex);
         }
@@ -518,7 +531,12 @@ renderTextarea() {
     loadCurrentAnswer() {
         // Load the saved answer for current question
         const savedAnswer = this.answers[this.currentQuestion];
-        if (!savedAnswer) return;
+        console.log(`Loading answer for question ${this.currentQuestion}:`, savedAnswer);
+        
+        if (!savedAnswer) {
+            console.log(`No saved answer found for question ${this.currentQuestion}`);
+            return;
+        }
         
         const currentQuestion = this.questions[this.currentQuestion];
         if (!currentQuestion) return;
@@ -528,11 +546,13 @@ renderTextarea() {
             if (radio) {
                 radio.checked = true;
                 this.selectMCQOption(radio.closest('.mcq-option'));
+                console.log(`MCQ answer loaded for question ${this.currentQuestion}`);
             }
         } else {
             const textarea = document.getElementById('answerTextarea');
             if (textarea) {
                 textarea.value = savedAnswer;
+                console.log(`Text answer loaded for question ${this.currentQuestion}`);
             }
         }
     }
@@ -620,6 +640,9 @@ renderTextarea() {
     }
     
     showSubmitModal() {
+        // First, save the current answer before showing modal
+        this.saveCurrentAnswer(true);
+        
         const answeredCount = Object.keys(this.answers).length;
         
         // Update modal content
@@ -634,6 +657,9 @@ renderTextarea() {
     }
     
     async submitInterview() {
+        // Save the current answer before submitting
+        this.saveCurrentAnswer(true);
+        
         const submitBtn = document.getElementById('confirmSubmit');
         if (submitBtn) {
             InterviewBuddy.showLoading(submitBtn, 'Submitting...');

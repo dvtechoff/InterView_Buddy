@@ -340,6 +340,9 @@ Generate the questions now:
     
     def evaluate_answers(self, questions, user_answers, setup_data):
         """Evaluate user answers using AI"""
+        print(f"🔍 Evaluating {len(questions)} questions")
+        print(f"📝 Received answers for questions: {list(user_answers.keys())}")
+        
         results = {
             'questions_results': [],
             'overall_score': 0,
@@ -355,9 +358,27 @@ Generate the questions now:
         all_resources = []
         
         for i, question in enumerate(questions):
-            question_result = self._evaluate_single_question(
-                question, user_answers.get(str(i), ''), setup_data
-            )
+            answer_key = str(i)
+            answer = user_answers.get(answer_key, '')
+            
+            # Only evaluate if the user actually provided an answer (not just empty string)
+            if answer_key in user_answers and answer.strip():
+                print(f"✅ Evaluating question {i}")
+                question_result = self._evaluate_single_question(
+                    question, answer, setup_data
+                )
+            else:
+                print(f"⚠️ Skipping question {i} - no answer provided")
+                # Create a default result for unanswered questions
+                question_result = {
+                    'score': 0,
+                    'evaluation': 'No answer provided',
+                    'strengths': [],
+                    'weaknesses': ['Question not answered'],
+                    'recommendations': ['Consider attempting all questions in the future'],
+                    'suggested_resources': []
+                }
+            
             results['questions_results'].append(question_result)
             total_score += question_result['score']
             
@@ -392,6 +413,9 @@ Generate the questions now:
     
     def _evaluate_single_question(self, question, user_answer, setup_data):
         """Evaluate a single question with detailed analysis"""
+        print(f"🔍 Evaluating question: '{question['text'][:50]}...'")
+        print(f"📝 User answer: '{user_answer}' (type: {type(user_answer)}, length: {len(str(user_answer))})")
+        
         result = {
             'question': question['text'],
             'user_answer': user_answer,
@@ -429,16 +453,24 @@ Generate the questions now:
                 )
         else:
             # Use AI to evaluate short answers with detailed analysis
+            print(f"🤖 Evaluating short answer with AI...")
             evaluation_result = self._evaluate_short_answer_detailed(
                 question, user_answer, setup_data
             )
             result.update(evaluation_result)
+            print(f"✅ AI evaluation result: score={result.get('score', 0)}")
         
         return result
     
     def _evaluate_short_answer_detailed(self, question, user_answer, setup_data):
         """Evaluate short answer with detailed analysis using AI"""
-        if not user_answer.strip():
+        print(f"🔍 _evaluate_short_answer_detailed called")
+        print(f"📝 Received answer: '{user_answer}' (type: {type(user_answer)})")
+        print(f"📏 Answer length after strip: {len(str(user_answer).strip()) if user_answer else 0}")
+        
+        # Check for completely empty answers (after stripping whitespace)
+        if not user_answer or not user_answer.strip():
+            print("❌ Answer is empty after stripping")
             return {
                 'score': 0,
                 'feedback': "No answer provided.",
@@ -451,6 +483,24 @@ Generate the questions now:
                     question.get('category', 'General'), setup_data
                 )
             }
+        
+        # Check for very short answers (less than 3 characters)
+        if len(user_answer.strip()) < 3:
+            print("⚠️ Answer is very short (< 3 characters)")
+            return {
+                'score': 1,
+                'feedback': "Answer is too brief. Please provide more detail.",
+                'detailed_analysis': {
+                    'clarity': {'score': 2, 'feedback': 'Answer is too short to evaluate clarity properly.'},
+                    'correctness': {'score': 1, 'feedback': 'Cannot assess correctness with such a brief response.'},
+                    'completeness': {'score': 0, 'feedback': 'Answer lacks sufficient detail and completeness.'}
+                },
+                'suggested_resources': self._get_resources_for_category(
+                    question.get('category', 'General'), setup_data
+                )
+            }
+        
+        print(f"✅ Answer passes validation checks, proceeding with AI evaluation")
         
         interview_type = setup_data.get('interview_type', '').lower()
         

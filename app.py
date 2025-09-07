@@ -302,10 +302,9 @@ def complete_interview():
     if not questions or 'user_answers' not in session:
         print("❌ Interview data not found - questions or answers missing")
         return jsonify({'error': 'Interview data not found'}), 400
-    
+
     print(f"🎯 Completing interview for user: {session.get('user_id')}")
-    print(f"📊 Questions count: {len(questions)}")
-    print(f"📝 Answers count: {len(session['user_answers'])}")
+    print(f"📊 Processing {len(questions)} questions with {len(session['user_answers'])} answers")
     
     try:
         # Evaluate answers using AI
@@ -316,8 +315,8 @@ def complete_interview():
             session['interview_setup']
         )
         print("✅ AI evaluation completed")
-        
-        # Save the report
+        print(f"📊 Overall score: {results.get('overall_score', 'N/A')}")
+                # Save the report
         print("💾 Saving report to Firebase...")
         report_id = storage_manager.save_report(
             session['user_id'],

@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'interview-buddy-secret-key-2024'
-    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') or 'AIzaSyAhaDdX0180qPIesVk7XOMuWgt5_Rjej-8'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or ' '
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY') or ' '
     
     # Environment settings
     DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
