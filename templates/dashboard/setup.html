@@ -1,0 +1,674 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Setup - InterviewBuddy{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Professional setup page styles */
+
+    .form-select optgroup {
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-weight: 600;
+    padding: 4px 8px;
+}
+
+/* Ensure options inside optgroup inherit properly */
+.form-select optgroup option {
+    background: var(--input-bg);
+    color: var(--input-text);
+}
+
+/* Dark theme fix */
+[data-theme="dark"] .form-select optgroup {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+    .setup-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .setup-header {
+        background: var(--primary-blue);
+        color: white;
+        border-radius: var(--border-radius-xl);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .setup-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    .setup-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--card-shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-label i {
+        color: var(--primary-blue);
+    }
+    
+    .form-select, .form-control {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--input-text);
+        border-radius: var(--border-radius);
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: var(--transition-base);
+    }
+    
+    .form-select:focus, .form-control:focus {
+        border-color: var(--input-border-focus);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    .form-select option {
+        background: var(--input-bg);
+        color: var(--input-text);
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+    
+    .estimated-time-card {
+        background: var(--primary-blue-light);
+        border: 1px solid var(--primary-blue);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    [data-theme="dark"] .estimated-time-card {
+        background: rgba(37, 99, 235, 0.1);
+        border-color: var(--primary-blue);
+    }
+    
+    .estimated-time-icon {
+        color: var(--primary-blue);
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+    
+    .btn-setup {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: var(--transition-base);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-setup:hover {
+        background: var(--primary-blue-hover);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-setup::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-setup:hover::before {
+        left: 100%;
+    }
+    
+    .tips-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--card-shadow);
+    }
+    
+    .tips-header {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .tip-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        transition: var(--transition-base);
+        border-radius: var(--border-radius);
+        margin: 0 1.5rem;
+    }
+    
+    .tip-item:hover {
+        background: var(--bg-secondary);
+        transform: translateX(8px);
+        padding-left: 1rem;
+    }
+    
+    .tip-icon {
+        color: var(--success-green);
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+    
+    .validation-feedback {
+        display: none;
+        font-size: 0.875rem;
+        color: var(--danger-red);
+        margin-top: 0.25rem;
+    }
+    
+    .is-invalid .validation-feedback {
+        display: block;
+    }
+    
+    .is-invalid .form-select,
+    .is-invalid .form-control {
+        border-color: var(--danger-red);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+    
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .setup-container {
+            padding: 1rem;
+        }
+        
+        .setup-header {
+            padding: 1.5rem;
+        }
+        
+        .setup-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="setup-container">
+        <!-- Setup Header -->
+        <div class="setup-header">
+            <h2 class="fw-bold mb-2">
+                <i class="fas fa-rocket me-3"></i>Setup Your Interview
+            </h2>
+            <p class="mb-0 opacity-90">Configure your personalized interview experience</p>
+        </div>
+        
+        <div class="setup-card">
+            <form method="POST" id="setupForm">
+                <div class="row g-4">
+                    <!-- Job Role -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="job_role" class="form-label">
+                                <i class="fas fa-briefcase"></i>Job Role
+                            </label>
+                            <select class="form-select" id="job_role" name="job_role" required>
+                                <option value="">Select your target role</option>
+                                {% for role in config.JOB_ROLES %}
+                                    <option value="{{ role }}">{{ role }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="validation-feedback">Please select a job role</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Domain -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="domain" class="form-label">
+                                <i class="fas fa-code"></i>Domain/Technology
+                            </label>
+                            <select class="form-select" id="domain" name="domain" required>
+                                <option value="">Select a domain</option>
+                                {% for category, technologies in config.DOMAINS.items() %}
+                                    <optgroup label="{{ category }}">
+                                        {% for tech in technologies %}
+                                            <option value="{{ tech }}">{{ tech }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                            <div class="validation-feedback">Please select a domain</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Interview Type -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="interview_type" class="form-label">
+                                <i class="fas fa-clipboard-list"></i>Interview Type
+                            </label>
+                            <select class="form-select" id="interview_type" name="interview_type" required>
+                                <option value="">Select interview type</option>
+                                {% for type in config.INTERVIEW_TYPES %}
+                                    <option value="{{ type }}">{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="validation-feedback">Please select an interview type</div>
+                            <div class="form-text">
+                                <strong>• Technical:</strong> Code & concepts <br>• <strong>Behavioral:</strong> STAR-format, teamwork, leadership <br>• <strong>Mixed:</strong> Both types
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Question Type -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="question_type" class="form-label">
+                                <i class="fas fa-question-circle"></i>Question Format
+                            </label>
+                            <select class="form-select" id="question_type" name="question_type" required>
+                                <option value="">Select question format</option>
+                                {% for qtype in config.QUESTION_TYPES %}
+                                    <option value="{{ qtype }}">{{ qtype }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="validation-feedback">Please select a question format</div>
+                            <div class="form-text">
+                                <strong>• MCQ:</strong> Multiple choice <br>• <strong>Short Answer:</strong> Written responses <br>• <strong>AI Choice:</strong> Mixed
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Number of Questions -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="question_count" class="form-label">
+                                <i class="fas fa-hashtag"></i>Number of Questions
+                            </label>
+                            <select class="form-select" id="question_count" name="question_count" required>
+                                {% for i in range(config.MIN_QUESTIONS_PER_SESSION, config.MAX_QUESTIONS_PER_SESSION + 1, 5) %}
+                                    <option value="{{ i }}" 
+                                        {% if i == config.DEFAULT_QUESTIONS_COUNT %}selected{% endif %}>
+                                        {{ i }} questions
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="validation-feedback">Please select question count</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Difficulty Level -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="difficulty" class="form-label">
+                                <i class="fas fa-layer-group"></i>Difficulty Level
+                            </label>
+                            <select class="form-select" id="difficulty" name="difficulty">
+                                <option value="Easy">Easy - Entry level</option>
+                                <option value="Medium" selected>Medium - Mid level</option>
+                                <option value="Hard">Hard - Senior level</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estimated Time -->
+                <div class="estimated-time-card">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock estimated-time-icon"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Estimated Duration</h6>
+                            <div class="h5 mb-1" id="estimatedTime">15-20 minutes</div>
+                            <small class="text-muted">
+                                Based on your selected format and question count
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3 justify-content-end">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                    <button type="submit" class="btn btn-setup btn-lg">
+                        <i class="fas fa-rocket me-2"></i>Start Interview
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Tips Card -->
+        <div class="tips-card">
+            <div class="tips-header">
+                <h6 class="fw-bold mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Pro Tips for Success
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="tip-item">
+                            <i class="fas fa-check tip-icon"></i>
+                            <span>Find a quiet, well-lit environment</span>
+                        </div>
+                        <div class="tip-item">
+                            <i class="fas fa-check tip-icon"></i>
+                            <span>Read questions carefully before answering</span>
+                        </div>
+                        <div class="tip-item">
+                            <i class="fas fa-check tip-icon"></i>
+                            <span>Think through your approach systematically</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="tip-item">
+                            <i class="fas fa-check tip-icon"></i>
+                            <span>Use concrete examples in behavioral questions</span>
+                        </div>
+                        <div class="tip-item">
+                            <i class="fas fa-check tip-icon"></i>
+                            <span>Explain your reasoning for technical problems</span>
+                        </div>
+                        <div class="tip-item">
+                            <i class="fas fa-check tip-icon"></i>
+                            <span>Focus on learning rather than perfection</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Professional form validation and UX
+    const form = document.getElementById('setupForm');
+    const requiredFields = ['job_role', 'domain', 'interview_type', 'question_type', 'question_count'];
+    
+    // Handle interview type changes
+    document.getElementById('interview_type').addEventListener('change', function() {
+        const interviewType = this.value;
+        const questionTypeSelect = document.getElementById('question_type');
+        const questionTypeOptions = questionTypeSelect.querySelectorAll('option');
+        
+        if (interviewType === 'Behavioral') {
+            // For behavioral interviews, force Short Answer and disable other options
+            questionTypeSelect.value = 'Short Answer';
+            
+            // Disable MCQ and AI Choice options
+            questionTypeOptions.forEach(option => {
+                if (option.value === 'MCQ' || option.value === 'AI Choice') {
+                    option.style.display = 'none';
+                    option.disabled = true;
+                } else {
+                    option.style.display = '';
+                    option.disabled = false;
+                }
+            });
+            
+            // Update the help text
+            const helpText = document.querySelector('#question_type').parentNode.querySelector('.form-text');
+            if (helpText) {
+                helpText.innerHTML = '<strong>Behavioral interviews require detailed written responses to assess soft skills effectively.</strong>';
+            }
+        } else {
+            // For other interview types, enable all options
+            questionTypeOptions.forEach(option => {
+                option.style.display = '';
+                option.disabled = false;
+            });
+            
+            // Restore original help text
+            const helpText = document.querySelector('#question_type').parentNode.querySelector('.form-text');
+            if (helpText) {
+                helpText.innerHTML = '<strong>• MCQ:</strong> Multiple choice <br>• <strong>Short Answer:</strong> Written responses <br>• <strong>AI Choice:</strong> Mixed';
+            }
+        }
+        
+        updateEstimatedTime();
+    });
+    
+    // Update estimated time
+    function updateEstimatedTime() {
+        const questionCount = parseInt(document.getElementById('question_count').value) || 10;
+        const questionType = document.getElementById('question_type').value;
+        
+        let timePerQuestion = 2;
+        
+        switch(questionType) {
+            case 'MCQ':
+                timePerQuestion = 1.5;
+                break;
+            case 'Short Answer':
+                timePerQuestion = 3;
+                break;
+            case 'AI Choice':
+                timePerQuestion = 2.5;
+                break;
+        }
+        
+        const totalTime = Math.round(questionCount * timePerQuestion);
+        const minTime = Math.max(1, totalTime - 5);
+        const maxTime = totalTime + 5;
+        
+        const timeElement = document.getElementById('estimatedTime');
+        timeElement.style.opacity = '0.5';
+        
+        setTimeout(() => {
+            timeElement.textContent = `${minTime}-${maxTime} minutes`;
+            timeElement.style.opacity = '1';
+        }, 150);
+    }
+    
+    // Form validation
+    function validateField(fieldId) {
+        const field = document.getElementById(fieldId);
+        const formGroup = field.closest('.form-group');
+        
+        if (!field.value.trim()) {
+            formGroup.classList.add('is-invalid');
+            return false;
+        } else {
+            formGroup.classList.remove('is-invalid');
+            return true;
+        }
+    }
+    
+    // Real-time validation
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        
+        field.addEventListener('change', () => {
+            validateField(fieldId);
+            if (fieldId === 'question_count' || fieldId === 'question_type') {
+                updateEstimatedTime();
+            }
+        });
+        
+        field.addEventListener('focus', () => {
+            field.closest('.form-group').classList.remove('is-invalid');
+        });
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate all required fields
+        requiredFields.forEach(fieldId => {
+            if (!validateField(fieldId)) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            
+            // Scroll to first invalid field
+            const firstInvalid = document.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                setTimeout(() => {
+                    const field = firstInvalid.querySelector('select, input');
+                    if (field) field.focus();
+                }, 500);
+            }
+            
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+        
+        showToast('Setting up your interview...', 'success');
+    });
+    
+    // Toast notification system
+    function showToast(message, type = 'info') {
+        // Remove existing toasts
+        const existingToasts = document.querySelectorAll('.toast-notification');
+        existingToasts.forEach(toast => toast.remove());
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} me-2"></i>
+                ${message}
+            </div>
+        `;
+        
+        // Toast styles
+        Object.assign(toast.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: type === 'error' ? '#dc2626' : '#059669',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            borderRadius: '8px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+            zIndex: '9999',
+            transform: 'translateX(400px)',
+            transition: 'all 0.3s ease',
+            fontWeight: '500',
+            fontSize: '0.95rem'
+        });
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto remove
+        setTimeout(() => {
+            toast.style.transform = 'translateX(400px)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateEstimatedTime();
+        
+        // Animate form elements on load
+        const formGroups = document.querySelectorAll('.form-group');
+        formGroups.forEach((group, index) => {
+            group.style.opacity = '0';
+            group.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                group.style.transition = 'all 0.4s ease';
+                group.style.opacity = '1';
+                group.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,3 @@
+# Alternative Procfile for platforms that support Gunicorn (Linux-based)
+# Rename this to 'Procfile' if deploying to Linux-based platforms like Railway, Render
+web: gunicorn wsgi:app --workers=4 --bind=0.0.0.0:$PORT

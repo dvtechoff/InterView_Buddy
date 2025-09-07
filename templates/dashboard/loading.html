@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Loading - InterviewBuddy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 text-center">
+            <div class="card border-0 shadow">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <div class="loading-spinner mx-auto mb-3"></div>
+                        <h4 class="fw-bold text-primary">Generating Your Interview</h4>
+                        <p class="text-muted">AI is creating personalized questions for you...</p>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%" id="loadingProgress">
+                        </div>
+                    </div>
+                    
+                    <div id="loadingStatus" class="text-muted small">
+                        Preparing interview questions...
+                    </div>
+                    
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            This usually takes 10-30 seconds depending on the number of questions
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBar = document.getElementById('loadingProgress');
+    const statusElement = document.getElementById('loadingStatus');
+    
+    const steps = [
+        { progress: 20, text: 'Analyzing your preferences...' },
+        { progress: 40, text: 'Generating AI questions...' },
+        { progress: 60, text: 'Validating question quality...' },
+        { progress: 80, text: 'Finalizing your interview...' },
+        { progress: 100, text: 'Ready to start!' }
+    ];
+    
+    let currentStep = 0;
+    
+    function updateProgress() {
+        if (currentStep < steps.length) {
+            const step = steps[currentStep];
+            progressBar.style.width = step.progress + '%';
+            statusElement.textContent = step.text;
+            currentStep++;
+            
+            setTimeout(updateProgress, 3500);
+        } else {
+            // Generate questions
+            generateQuestions();
+        }
+    }
+    
+    // Start progress animation
+    setTimeout(updateProgress, 500);
+    
+    function generateQuestions() {
+        fetch('/generate_questions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusElement.textContent = 'Interview ready! Redirecting...';
+                setTimeout(() => {
+                    window.location.href = '/interview';
+                }, 1000);
+            } else {
+                throw new Error(data.error || 'Failed to generate questions');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            statusElement.innerHTML = `
+                <div class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Error generating questions. <a href="/setup" class="text-decoration-none">Try again</a>
+                </div>
+            `;
+            progressBar.classList.remove('progress-bar-striped', 'progress-bar-animated');
+            progressBar.classList.add('bg-danger');
+        });
+    }
+});
+</script>
+{% endblock %}

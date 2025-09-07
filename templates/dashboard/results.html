@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Results - InterviewBuddy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Results Header -->
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h2 class="display-6 fw-bold mb-3">Interview Complete!</h2>
+            <p class="lead text-muted">Here's how you performed</p>
+        </div>
+    </div>
+    
+    <!-- Overall Score -->
+    <div class="row mb-4">
+        <div class="col-md-4 mx-auto">
+            <div class="card border-0 shadow text-center">
+                <div class="card-body p-4">
+                    <div class="score-circle score-{{ 'excellent' if results.overall_score >= 8 else 'good' if results.overall_score >= 6 else 'poor' }}" 
+                         style="--score-angle: {{ (results.overall_score / 10 * 360) }}deg">
+                        <div class="score-text">{{ results.overall_score }}/10</div>
+                    </div>
+                    <h5 class="fw-bold">Overall Score</h5>
+                    <p class="text-muted mb-0">
+                        {% if results.overall_score >= 8 %}
+                            Excellent Performance! 🎉
+                        {% elif results.overall_score >= 6 %}
+                            Good Job! 👍
+                        {% else %}
+                            Keep Practicing! 💪
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<!-- Category Scores -->
+{% if results.category_scores %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card border-0 shadow {% if dark_mode %}bg-dark text-light{% endif %}">
+            <div class="card-header {% if dark_mode %}bg-secondary text-light{% else %}{% endif %}">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Category Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category, score in results.category_scores.items() %}
+                    <div class="col-md-6 mb-3">
+                        <div class="category-score">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0 {% if dark_mode %}text-light{% endif %}">{{ category }}</h6>
+                                <span class="fw-bold">{{ score }}/10</span>
+                            </div>
+                            <div class="score-bar">
+                                <div class="score-bar-fill bg-{{ 'success' if score >= 8 else 'warning' if score >= 6 else 'danger' }}" 
+                                     style="width: {{ (score / 10 * 100) }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+    
+    <!-- Strengths and Weaknesses -->
+    <div class="row mb-4">
+        {% if results.strengths %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-success text-white">
+                    <h6 class="fw-bold mb-0">
+                        <i class="fas fa-star me-2"></i>Strengths
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        {% for strength in results.strengths %}
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            {{ strength }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if results.weaknesses %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="fw-bold mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Areas for Improvement
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        {% for weakness in results.weaknesses %}
+                        <li class="mb-2">
+                            <i class="fas fa-arrow-up text-warning me-2"></i>
+                            {{ weakness }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Recommendations -->
+    {% if results.recommendations %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for recommendation in results.recommendations %}
+                        <div class="col-md-6 mb-3">
+                            <div class="recommendation-card">
+                                <div class="recommendation-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <p class="mb-0">{{ recommendation }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+<!-- Question-by-Question Feedback -->
+{% if results.questions_results %}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card border-0 shadow {% if dark_mode %}bg-dark text-light{% endif %}">
+            <div class="card-header {% if dark_mode %}bg-secondary text-light{% else %}{% endif %}">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-list-alt me-2"></i>Detailed Feedback
+                </h5>
+            </div>
+            <div class="card-body {% if dark_mode %}text-light{% endif %}">
+                <div class="accordion" id="feedbackAccordion">
+                    {% for result in results.questions_results %}
+                    <div class="accordion-item {% if dark_mode %}bg-dark text-light{% endif %} mb-2">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button {% if result.score < 7 %}collapsed{% endif %} {% if dark_mode %}bg-dark text-light{% endif %}" 
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" 
+                                    aria-expanded="{{ 'true' if result.score >= 7 else 'false' }}" 
+                                    aria-controls="collapse{{ loop.index }}">
+                                Question {{ loop.index }} - 
+                                <span class="ms-2 badge {% if result.score >= 7 %}bg-success{% else %}bg-danger{% endif %}">
+                                    Score: {{ result.score }}
+                                </span>
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse {% if result.score >= 7 %}show{% endif %}" 
+                             aria-labelledby="heading{{ loop.index }}" data-bs-parent="#feedbackAccordion">
+                            <div class="accordion-body {% if dark_mode %}text-light{% endif %}">
+                                <p><strong>Question:</strong> {{ result.question }}</p>
+                                <p><strong>Your Answer:</strong> {{ result.user_answer or 'No answer provided' }}</p>
+                                {% if result.correct_answer %}
+                                <p><strong>Correct Answer:</strong> {{ result.correct_answer }}</p>
+                                {% endif %}
+                                
+                                <!-- Main Feedback -->
+                                <div class="mb-3">
+                                    <strong>Overall Feedback:</strong>
+                                    <div class="bg-light p-3 rounded mt-2">{{ result.feedback }}</div>
+                                </div>
+                                
+                                <!-- Detailed Analysis -->
+                                {% if result.detailed_analysis %}
+                                <div class="detailed-analysis mb-3">
+                                    <strong>Detailed Analysis:</strong>
+                                    <div class="row mt-2">
+                                        {% for aspect, details in result.detailed_analysis.items() %}
+                                        <div class="col-md-4 mb-2">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <h6 class="card-title text-capitalize">
+                                                        {{ aspect.replace('_', ' ') }}
+                                                        <span class="badge bg-{% if details.score >= 8 %}success{% elif details.score >= 6 %}warning{% else %}danger{% endif %} ms-2">
+                                                            {{ details.score }}/10
+                                                        </span>
+                                                    </h6>
+                                                    <p class="card-text small">{{ details.feedback }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Suggested Resources -->
+                                {% if result.suggested_resources %}
+                                <div class="suggested-resources">
+                                    <strong>Suggested Learning Resources:</strong>
+                                    <ul class="list-group list-group-flush mt-2">
+                                        {% for resource in result.suggested_resources %}
+                                        <li class="list-group-item">
+                                            <i class="fas fa-book text-primary me-2"></i>{{ resource }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Overall Suggested Resources -->
+{% if results.suggested_resources %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>Recommended Learning Resources
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Based on your performance, here are curated learning resources to help you improve:</p>
+                <div class="row">
+                    {% for resource in results.suggested_resources %}
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-book-open text-primary me-2 mt-1"></i>
+                            <span>{{ resource }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+    
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col text-center">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{{ url_for('setup') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-redo me-2"></i>Take Another Interview
+                </a>
+                <a href="{{ url_for('reports') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-chart-bar me-2"></i>View All Reports
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-home me-2"></i>Back to Dashboard
+                </a>
+                {% if session.report_id %}
+                <a href="{{ url_for('download_report', report_id=session.report_id) }}" class="btn btn-success btn-lg">
+                    <i class="fas fa-download me-2"></i>Download PDF
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate score circles
+    const scoreCircles = document.querySelectorAll('.score-circle');
+    scoreCircles.forEach(circle => {
+        const scoreText = circle.querySelector('.score-text');
+        if (scoreText) {
+            const score = parseFloat(scoreText.textContent);
+            ChartUtils.animateScoreCircle(circle, score, 10);
+        }
+    });
+    
+    // Animate score bars
+    const scoreBars = document.querySelectorAll('.score-bar-fill');
+    scoreBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+    
+    // Add fade-in animation to cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

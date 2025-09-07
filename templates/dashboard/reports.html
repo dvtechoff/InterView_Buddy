@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - InterviewBuddy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">Interview Reports</h2>
+                    <p class="text-muted mb-0">Track your interview performance over time</p>
+                </div>
+                <a href="{{ url_for('setup') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>New Interview
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% if reports %}
+        <!-- Reports Table -->
+        <div class="row">
+            <div class="col">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-history me-2"></i>Interview History
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Job Role</th>
+                                        <th>Domain</th>
+                                        <th>Type</th>
+                                        <th>Questions</th>
+                                        <th>Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in reports %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ report.created_at[:10] }}</div>
+                                            <small class="text-muted">{{ report.created_at[11:16] }}</small>
+                                        </td>
+                                        <td>{{ report.setup.job_role }}</td>
+                                        <td>
+                                            <span class="badge bg-info">{{ report.setup.domain }}</span>
+                                        </td>
+                                        <td>{{ report.setup.interview_type }}</td>
+                                        <td>{{ report.questions | length }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge 
+                                                    {% if report.results.overall_score >= 8 %}bg-success
+                                                    {% elif report.results.overall_score >= 6 %}bg-warning
+                                                    {% else %}bg-danger{% endif %} me-2">
+                                                    {{ report.results.overall_score }}/10
+                                                </span>
+                                                <small class="text-muted">
+                                                    {% if report.results.overall_score >= 8 %}Excellent
+                                                    {% elif report.results.overall_score >= 6 %}Good
+                                                    {% else %}Needs Work{% endif %}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('view_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-primary" title="View Report">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('download_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-success" title="Download PDF">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Performance Chart -->
+        <div class="row mt-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white">
+                        <h6 class="fw-bold mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Score Progression
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="scoreProgressionChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white">
+                        <h6 class="fw-bold mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Domain Distribution
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="domainChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <!-- Empty State -->
+        <div class="row">
+            <div class="col">
+                <div class="card border-0 shadow">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-clipboard-list fa-4x text-muted mb-4"></i>
+                        <h4 class="fw-bold mb-3">No Interview Reports Yet</h4>
+                        <p class="text-muted mb-4">
+                            You haven't completed any interviews yet. Start your first interview to see your progress here.
+                        </p>
+                        <a href="{{ url_for('setup') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play me-2"></i>Start Your First Interview
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if reports %}
+        // Prepare data for charts
+        let reports = {{ reports | tojson | safe }};
+
+        reports = reports.slice().reverse();
+
+
+        // Score progression data
+        const progressionData = reports.map(report => ({
+            date: report.created_at.substring(0, 10),
+            score: report.results.overall_score
+        }));
+        
+        // Domain distribution data
+        const domainCounts = {};
+        reports.forEach(report => {
+            const domain = report.setup.domain;
+            domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+        });
+        
+        // Create charts
+        if (progressionData.length > 0) {
+            ChartUtils.createScoreProgressionChart(progressionData);
+        }
+        
+        if (Object.keys(domainCounts).length > 0) {
+            ChartUtils.createDomainDistributionChart(domainCounts);
+        }
+    {% endif %}
+    
+    // Add tooltips to action buttons
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

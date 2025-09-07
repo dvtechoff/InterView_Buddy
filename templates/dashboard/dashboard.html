@@ -1,0 +1,569 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - InterviewBuddy{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Dashboard-specific enhancements */
+    .welcome-section {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .welcome-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+        animation: welcomeFloat 8s ease-in-out infinite;
+    }
+    
+    @keyframes welcomeFloat {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(180deg); }
+    }
+    
+    .welcome-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .quick-action-card {
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius-lg);
+        padding: 2.5rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .quick-action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: actionShine 3s infinite;
+    }
+    
+    @keyframes actionShine {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 30px 70px rgba(102, 126, 234, 0.6);
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--primary-gradient);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        border-color: rgba(0, 212, 255, 0.3);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        font-family: var(--font-family-mono);
+    }
+    
+    .recent-interviews-card {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .table-dark-custom {
+        background: transparent;
+        color: var(--dark-text);
+    }
+    
+    .table-dark-custom thead th {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: var(--dark-text);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.875rem;
+        padding: 1.25rem 1rem;
+    }
+    
+    .table-dark-custom tbody tr {
+        border-color: rgba(255, 255, 255, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .table-dark-custom tbody tr:hover {
+        background: rgba(0, 212, 255, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .table-dark-custom tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        color: var(--dark-text-muted);
+    }
+    
+    .score-badge {
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .performance-chart-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .tips-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tips-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--success-gradient);
+    }
+    
+    .tip-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .tip-item:last-child {
+        border-bottom: none;
+    }
+    
+    .tip-item:hover {
+        transform: translateX(8px);
+        padding-left: 0.5rem;
+    }
+    
+    .tip-icon {
+        color: var(--neon-green);
+        margin-right: 1rem;
+        font-size: 1.125rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--dark-text-muted);
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 2rem;
+        opacity: 0.5;
+        animation: emptyStateFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes emptyStateFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    /* Responsive enhancements */
+    @media (max-width: 768px) {
+        .welcome-section {
+            padding: 2rem 1.5rem;
+        }
+        
+        .quick-action-card {
+            padding: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+        }
+        
+        .stat-card {
+            margin-bottom: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Welcome Section -->
+    <section class="welcome-section fade-in-up">
+        <div class="welcome-content">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-5 fw-bold mb-3">
+                        Welcome back, <span style="background: var(--primary-gradient); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ session.user_name }}</span>!
+                    </h1>
+                    <p class="lead mb-4">Ready to practice and improve your interview skills?</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="welcome-animation">
+                        <i class="fas fa-rocket" style="font-size: 4rem; color: var(--neon-blue); animation: float 3s ease-in-out infinite;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Action Card -->
+    <section class="mb-5">
+        <div class="quick-action-card fade-in-up animate-delay-100">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h3 class="fw-bold mb-2">Start a New Interview</h3>
+                    <p class="mb-0 opacity-90">Practice with AI-generated questions tailored to your role</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <a href="{{ url_for('setup') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-play me-2"></i>Start Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Grid -->
+    <section class="mb-5">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card fade-in-up animate-delay-100">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.total_interviews }}</div>
+                    <p class="text-muted mb-0 fw-semibold">Total Interviews</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card fade-in-up animate-delay-200">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.average_score }}%</div>
+                    <p class="text-muted mb-0 fw-semibold">Average Score</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card fade-in-up animate-delay-300">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.best_score }}%</div>
+                    <p class="text-muted mb-0 fw-semibold">Best Score</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card fade-in-up animate-delay-400">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="stat-number">{{ stats.favorite_domain }}</div>
+                    <p class="text-muted mb-0 fw-semibold">Favorite Domain</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="row">
+        <!-- Recent Interviews -->
+        <div class="col-lg-8">
+            <div class="recent-interviews-card fade-in-left animate-delay-200">
+                <div class="card-header bg-transparent border-0 p-4">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-history me-3 text-primary"></i>Recent Interviews
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_reports %}
+                        <div class="table-responsive">
+                            <table class="table table-dark-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Role</th>
+                                        <th>Domain</th>
+                                        <th>Score</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in recent_reports %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ report.created_at[:10] }}</div>
+                                            <small class="text-muted">{{ report.created_at[11:16] }}</small>
+                                        </td>
+                                        <td>{{ report.setup.job_role }}</td>
+                                        <td>
+                                            <span class="badge" style="background: black;">{{ report.setup.domain }}</span>
+                                        </td>
+                                        <td>
+                                            <span  class="score-badge
+                                                {% if report.results.overall_score >= 8 %}bg-success
+                                                {% elif report.results.overall_score >= 6 %}bg-warning
+                                                {% else %}bg-danger{% endif %}">
+                                                {{ report.results.overall_score }}/10
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('view_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-primary btn-sm" title="View Report">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('download_report', report_id=report.id) }}" 
+                                                   class="btn btn-outline-success btn-sm" title="Download">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-4 text-center border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                            <a href="{{ url_for('reports') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-chart-bar me-2"></i>View All Reports
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list empty-state-icon"></i>
+                            <h6 class="text-muted">No interviews yet</h6>
+                            <p class="text-muted">Start your first interview to see your progress here</p>
+                            <a href="{{ url_for('setup') }}" class="btn btn-primary">
+                                Start First Interview
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Sidebar -->
+        <div class="col-lg-4">
+            <!-- Performance Chart -->
+            <div class="performance-chart-card mb-4 fade-in-right animate-delay-300">
+                <div class="card-header bg-transparent border-0 p-3">
+                    <h6 class="fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-chart-pie me-2 text-info"></i>Performance Overview
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 200px;">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tips Card -->
+            <div class="tips-card fade-in-right animate-delay-400">
+                <div class="card-header bg-transparent border-0 p-3">
+                    <h6 class="fw-bold mb-0 d-flex align-items-center">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>Interview Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="tip-item">
+                        <i class="tip-icon fas fa-check-circle"></i>
+                        Practice regularly to build confidence
+                    </div>
+                    <div class="tip-item">
+                        <i class="tip-icon fas fa-check-circle"></i>
+                        Review your weak areas after each session
+                    </div>
+                    <div class="tip-item">
+                        <i class="tip-icon fas fa-check-circle"></i>
+                        Try different difficulty levels
+                    </div>
+                    <div class="tip-item">
+                        <i class="tip-icon fas fa-check-circle"></i>
+                        Focus on both technical and behavioral questions
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize scroll animations
+        initializeScrollAnimations();
+        
+        // Load performance chart with real data
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.recent_scores && data.recent_scores.length > 0) {
+                    createPerformanceChart(data.recent_scores);
+                } else {
+                    // Fallback for empty data
+                    createEmptyPerformanceChart();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading stats:', error);
+                createEmptyPerformanceChart();
+            });
+    });
+
+    function initializeScrollAnimations() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(40px)';
+            el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            observer.observe(el);
+        });
+    }
+
+     function getTextColor() {
+    return document.documentElement.getAttribute("data-theme") === "dark"
+        ? "#B8AEAB"  // light gray for dark mode
+        : "#B8AEAB"; // dark gray for light mode
+    }
+
+    function createPerformanceChart(scores) {
+        const ctx = document.getElementById('performanceChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Excellent (8-10)', 'Good (6-8)', 'Needs Work (0-6)'],
+                datasets: [{
+                    data: [
+                        scores.filter(s => s >= 8).length,
+                        scores.filter(s => s >= 6 && s < 8).length,
+                        scores.filter(s => s < 6).length
+                    ],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(251, 191, 36, 0.8)', 
+                        'rgba(244, 0, 0, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgb(16, 185, 129)',
+                        'rgb(251, 191, 36)',
+                        'rgb(244, 0, 0)'
+                    ],
+                    borderWidth: 2,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: getTextColor(),
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createEmptyPerformanceChart() {
+        const ctx = document.getElementById('performanceChart');
+        if (!ctx) return;
+        
+        const chartContainer = ctx.parentElement;
+        chartContainer.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-chart-pie fa-3x text-muted mb-3 opacity-50"></i>
+                <p class="text-muted mb-0">Complete interviews to see performance data</p>
+            </div>
+        `;
+    }
+</script>
+{% endblock %}

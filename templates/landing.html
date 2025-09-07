@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterviewBuddy - AI-Powered Interview Practice</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --secondary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0e27;
+            --dark-surface: rgba(255, 255, 255, 0.05);
+            --dark-border: rgba(255, 255, 255, 0.1);
+            --dark-text: #e2e8f0;
+            --dark-text-muted: #94a3b8;
+            --neon-blue: #00d4ff;
+            --neon-purple: #c084fc;
+            --neon-green: #10b981;
+            --border-radius: 16px;
+            --border-radius-lg: 24px;
+            --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family-base);
+            background: var(--dark-bg);
+            color: var(--dark-text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+        
+        @keyframes backgroundShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(1deg); }
+            50% { transform: scale(1.05) rotate(-1deg); }
+            75% { transform: scale(1.1) rotate(0.5deg); }
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg at 50% 50%,
+                transparent,
+                rgba(102, 126, 234, 0.1),
+                transparent,
+                rgba(118, 75, 162, 0.1),
+                transparent
+            );
+            animation: rotate 30s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hero-title {
+            background: var(--primary-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            font-size: clamp(3rem, 6vw, 5rem);
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            animation: slideInFromLeft 1s ease-out;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: var(--dark-text-muted);
+            margin-bottom: 3rem;
+            animation: slideInFromLeft 1s ease-out 0.2s both;
+        }
+        
+        @keyframes slideInFromLeft {
+            0% {
+                transform: translateX(-100px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .hero-buttons {
+            animation: slideInFromLeft 1s ease-out 0.4s both;
+        }
+        
+        .btn {
+            border-radius: var(--border-radius);
+            font-weight: 700;
+            padding: 1.25rem 3rem;
+            font-size: 1.125rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.6);
+            color: white;
+        }
+        
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+        }
+        
+        .btn-outline-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: var(--neon-blue);
+            transition: width 0.4s ease;
+            z-index: -1;
+        }
+        
+        .btn-outline-primary:hover {
+            color: var(--dark-bg);
+            border-color: var(--neon-blue);
+            transform: translateY(-4px);
+        }
+        
+        .btn-outline-primary:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Animation */
+        .hero-animation {
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .floating-element {
+            position: absolute;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: floatElements 8s ease-in-out infinite;
+        }
+        
+        .floating-element:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .floating-element:nth-child(2) {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 15%;
+            animation-delay: -2s;
+        }
+        
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: -4s;
+        }
+        
+        @keyframes floatElements {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-15px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+        
+        /* Features Section */
+        .features-section {
+            padding: 6rem 0;
+            position: relative;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem 2rem;
+            height: 100%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .feature-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Steps Section */
+        .steps-section {
+            padding: 6rem 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .step-item {
+            text-align: center;
+            position: relative;
+            padding: 2rem 1rem;
+        }
+        
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-number::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            animation: stepPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes stepPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+        
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark-text);
+        }
+        
+        .step-description {
+            color: var(--dark-text-muted);
+            font-size: 1rem;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 0;
+            background: var(--primary-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: ctaFloat 8s ease-in-out infinite;
+        }
+        
+        @keyframes ctaFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .cta-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cta-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cta-subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+        }
+        
+        .btn-light {
+            background: white;
+            color: var(--dark-bg);
+            font-weight: 700;
+            padding: 1.25rem 3rem;
+            font-size: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-light:hover {
+            background: white;
+            color: var(--dark-bg);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Animations on scroll */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+            
+            .btn {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+            
+            .feature-card {
+                padding: 2rem 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .feature-icon {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+            
+            .step-number {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .cta-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="hero-title">
+                        Master Your Next Interview with AI
+                    </h1>
+                    <p class="hero-subtitle">
+                        Practice with AI-powered interview questions tailored to your role and skill level. 
+                        Get instant feedback and improve your interview performance with cutting-edge technology.
+                    </p>
+                    <div class="hero-buttons">
+                        <div class="d-grid gap-3 d-md-flex">
+                            <a href="signup" class="btn btn-primary">
+                                Get Started Free
+                            </a>
+                            <a href="login" class="btn btn-outline-primary">
+                                Sign In
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-animation">
+                        <div class="text-center position-relative">
+                            <i class="fas fa-user-tie" style="font-size: 12rem; color: var(--neon-blue); opacity: 0.8;"></i>
+                            <div class="floating-elements">
+                                <div class="floating-element"></div>
+                                <div class="floating-element"></div>
+                                <div class="floating-element"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col">
+                    <h2 class="display-4 fw-bold mb-4 fade-in">Why Choose InterviewBuddy?</h2>
+                    <p class="lead text-muted fade-in">Everything you need to succeed in your next interview</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h5 class="feature-title">AI-Powered Questions</h5>
+                        <p class="text-muted">
+                            Get personalized interview questions generated by advanced AI based on your role and experience level.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="feature-title">Instant Feedback</h5>
+                        <p class="text-muted">
+                            Receive detailed feedback on your answers with scoring and recommendations for improvement.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h5 class="feature-title">Track Progress</h5>
+                        <p class="text-muted">
+                            Monitor your improvement over time with detailed analytics and performance reports.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="steps-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col">
+                    <h2 class="display-4 fw-bold mb-4 fade-in">How It Works</h2>
+                    <p class="lead text-muted fade-in">Simple steps to interview success</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="step-item fade-in">
+                        <div class="step-number">1</div>
+                        <h5 class="step-title">Sign Up</h5>
+                        <p class="step-description">Create your free account in seconds with advanced security</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step-item fade-in">
+                        <div class="step-number">2</div>
+                        <h5 class="step-title">Choose Role</h5>
+                        <p class="step-description">Select your target job role and domain from our extensive catalog</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step-item fade-in">
+                        <div class="step-number">3</div>
+                        <h5 class="step-title">Practice</h5>
+                        <p class="step-description">Answer AI-generated interview questions with real-time guidance</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="step-item fade-in">
+                        <div class="step-number">4</div>
+                        <h5 class="step-title">Improve</h5>
+                        <p class="step-description">Get detailed feedback and track your progress over time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col">
+                    <div class="cta-content">
+                        <h2 class="cta-title fade-in">Ready to Ace Your Next Interview?</h2>
+                        <p class="cta-subtitle fade-in">
+                            Join thousands of professionals who have improved their interview skills with InterviewBuddy's AI-powered platform
+                        </p>
+                        <div class="fade-in">
+                            <a href="signup" class="btn btn-light btn-lg">
+                                Start Practicing Now
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all elements with fade-in class
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Add staggered delay to feature cards
+            const featureCards = document.querySelectorAll('.feature-card.fade-in');
+            featureCards.forEach((card, index) => {
+                card.style.transitionDelay = `${index * 0.2}s`;
+            });
+            
+            // Add staggered delay to step items
+            const stepItems = document.querySelectorAll('.step-item.fade-in');
+            stepItems.forEach((item, index) => {
+                item.style.transitionDelay = `${index * 0.15}s`;
+            });
+        });
+        
+        // Mouse movement parallax effect
+        document.addEventListener('mousemove', function(e) {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            const floatingElements = document.querySelectorAll('.floating-element');
+            floatingElements.forEach((element, index) => {
+                const speed = (index + 1) * 0.5;
+                const x = mouseX * speed * 20;
+                const y = mouseY * speed * 20;
+                element.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
